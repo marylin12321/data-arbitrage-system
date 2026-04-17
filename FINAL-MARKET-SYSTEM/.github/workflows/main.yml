@@ -1,0 +1,32 @@
+name: Market Ready Data Pipelines
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+env:
+  USER: "GabrieleCorsoIT"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install
+        run: pip install pandas requests pyarrow huggingface_hub
+      - name: Execute
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_REPO_WEATHER: "${{ env.USER }}/italy-weather"
+          HF_REPO_ENERGY: "${{ env.USER }}/italy-energy"
+          HF_REPO_AIR: "${{ env.USER }}/italy-air"
+          HF_REPO_SEISMIC: "${{ env.USER }}/italy-seismic"
+          HF_REPO_POI: "${{ env.USER }}/italy-poi"
+          HF_REPO_RENEWABLES: "${{ env.USER }}/italy-renewables"
+          HF_REPO_FUEL: "${{ env.USER }}/italy-fuel"
+          HF_REPO_AI_TEXT: "${{ env.USER }}/italian-ai-corpus"
+        run: |
+          for f in pipelines/*.py; do 
+            echo "Eseguo $f..."
+            python $f || echo "Errore in $f"
+          done
